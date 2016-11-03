@@ -6,9 +6,6 @@ public class RagdollMovement : MonoBehaviour {
     Rigidbody torso;
     public float speed;
 
-    public LegsMovement legs;
-    public ArmsMovement arms;
-
 	// Use this for initialization
 	void Start () {
         torso = GetComponent<Rigidbody>();
@@ -30,9 +27,6 @@ public class RagdollMovement : MonoBehaviour {
     void Animate(float h, float v)
     {
         Vector3 direction = new Vector3(h, 0.0f, v);
-        //use legs and arms variable to move them;
-
-        //move should be synchronized with foot steps
         Move(direction);
     }
 }
