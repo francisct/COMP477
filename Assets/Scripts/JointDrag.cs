@@ -5,7 +5,7 @@ using System.Collections;
 
 public class JointDrag : MonoBehaviour
 {
-
+    public float dragForce;
     private Vector3 screenPoint;
     private Vector3 offset;
 
@@ -22,7 +22,11 @@ public class JointDrag : MonoBehaviour
         Vector3 curScreenPoint = new Vector3(Input.mousePosition.x, Input.mousePosition.y, screenPoint.z);
 
         Vector3 curPosition = Camera.main.ScreenToWorldPoint(curScreenPoint) + offset;
- transform.position = curPosition;
+
+        Vector3 direction = curPosition - transform.position;
+
+        GetComponent<Rigidbody>().AddForce(Vector3.Normalize(direction) * dragForce, ForceMode.Impulse);
+        //transform.position = curPosition;
 
     }
     

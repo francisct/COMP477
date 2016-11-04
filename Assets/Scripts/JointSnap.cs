@@ -30,20 +30,14 @@ public class JointSnap : MonoBehaviour {
         Debug.Log(magnitude);
         if (magnitude > maxRadius)
         {
-            Transform parentJoint = GetParentJoint();
-            RemoveConnectedBody(parentJoint);
+            RemoveConnectedBody(transform.parent);
         }
 
     }
-
-    Transform GetParentJoint()
+    
+    void RemoveConnectedBody(Transform limb)
     {
-        return transform.parent.parent.transform;
-    }
-
-    void RemoveConnectedBody(Transform joint)
-    {
-        HingeJoint hinge = joint.GetComponent<HingeJoint>();
+        HingeJoint hinge = limb.GetComponent<HingeJoint>();
         Component.Destroy(hinge);
     }
 }
