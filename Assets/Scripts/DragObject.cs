@@ -5,6 +5,7 @@ using UnityEngine;
 public class DragObject : MonoBehaviour
 {
     public float SnapDistance = 2.5f;
+    public float ShrinkSpeed = 10;
 
     private GameObject _dragObject;
     private GameObject _scaleObject;
@@ -18,7 +19,7 @@ public class DragObject : MonoBehaviour
     private Vector3 _childOriginalPosition;
     private Vector3 _childOriginalLocalPosition;
 
-    private bool _snapped;
+    private bool _reset;
 
     private LayerMask _raycastLayers;
 
@@ -28,6 +29,16 @@ public class DragObject : MonoBehaviour
     // ReSharper disable once UnusedMember.Local
     private void Update()
     {
+        if (_reset)
+        {
+            _dragObject.transform.position = Vector3.Lerp(_dragObject.transform.position, _originalPosition,
+                                                          Time.deltaTime * ShrinkSpeed);
+            _scaleObject.transform.localScale = Vector3.Lerp(_scaleObject.transform.localScale, _originalScale,
+                                                             Time.deltaTime * ShrinkSpeed);
+            _childTransform.position = Vector3.Lerp(_childTransform.position, _childOriginalPosition,
+                                                    Time.deltaTime * ShrinkSpeed);
+        }
+
         if (!Input.GetMouseButtonDown(0))
             return;
 
@@ -50,7 +61,7 @@ public class DragObject : MonoBehaviour
 
         // We need this offset when moving the objects
         var offset = _dragObject.transform.position - mouseRay.GetPoint(hit.distance);
-
+        
         // If the object is detached, we just drag it
         if (!_draggable.Attached)
         {
@@ -85,6 +96,8 @@ public class DragObject : MonoBehaviour
     {
         while (Input.GetMouseButton(0))
         {
+            _reset = false;
+
             var screenRay = Camera.main.ScreenPointToRay(Input.mousePosition);
 
             // Distance between the hit point and object's original position
@@ -105,7 +118,7 @@ public class DragObject : MonoBehaviour
             else
                 _scaleObject.transform.localScale = _originalScale;
 
-            _snapped = distMagnitude > SnapDistance;
+            var snapped = distMagnitude > SnapDistance;
 
             if (distMagnitude > SnapDistance)
             {
@@ -116,17 +129,18 @@ public class DragObject : MonoBehaviour
                 _childTransform.localPosition = _childOriginalLocalPosition;
             }
 
+            if (snapped)
+            {
+                _draggable.AddRigidBody();
+                yield break;
+            }
+
             yield return null;
         }
 
-        if (_snapped)
-            yield break;
-
         // Reset everything
         _dragObject.transform.parent = _draggable.OriginalParent;
-        _dragObject.transform.position = _originalPosition;
-        _scaleObject.transform.localScale = _originalScale;
-        _childTransform.position = _childOriginalPosition;
+        _reset = true;
     }
 
     private IEnumerator DragDetachedObject(float distance, Vector3 offset)
@@ -140,5 +154,7 @@ public class DragObject : MonoBehaviour
 
             yield return null;
         }
+
+        _draggable.AddRigidBody();
     }
 }
