@@ -26,6 +26,9 @@ public class Draggable : MonoBehaviour
     // Add a rigid-body to this limb so that it falls on the ground
     public void AddRigidBody()
     {
+        if (GetComponent<Rigidbody>() != null)
+            return;
+
         gameObject.AddComponent<Rigidbody>();
         _rigidBodyAddedTime = Time.time;
     }
