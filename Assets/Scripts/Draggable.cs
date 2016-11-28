@@ -7,9 +7,19 @@ public class Draggable : MonoBehaviour
 
     public Transform OriginalParent;
 
+    internal Vector3 OriginalPosition;
+    internal Quaternion OriginalRotation;
+
     // The time we added the rigid-body (in order to allow some time for it
     //      to pick up velocity before trying to remove it because of zero velocity)
     private float _rigidBodyAddedTime;
+
+    // ReSharper disable once UnusedMember.Local
+    private void Start()
+    {
+        OriginalPosition = transform.position;
+        OriginalRotation = transform.rotation;
+    }
 
     // ReSharper disable once UnusedMember.Local
     private void Update()
