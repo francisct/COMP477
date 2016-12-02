@@ -23,9 +23,11 @@ public class JointDrag : MonoBehaviour
 
         Vector3 curPosition = Camera.main.ScreenToWorldPoint(curScreenPoint) + offset;
 
-        Vector3 direction = curPosition - transform.position;
+        transform.position = curPosition;
 
-        GetComponent<Rigidbody>().AddForce(Vector3.Normalize(direction) * dragForce, ForceMode.Impulse);
+        //Vector3 direction = curPosition - transform.position;
+
+        //GetComponent<Rigidbody>().AddForce(Vector3.Normalize(direction) * dragForce, ForceMode.Impulse);
         //transform.position = curPosition;
 
     }
