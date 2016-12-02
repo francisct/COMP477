@@ -128,8 +128,8 @@ public class DragJoint : MonoBehaviour
             return;
 
         _draggable.Attached = true;
-        _dragObject.transform.position = _draggable.OriginalPosition;
-        _dragObject.transform.rotation = _draggable.OriginalRotation;
+        _dragObject.transform.localPosition = _draggable.OriginalPosition;
+        _dragObject.transform.localRotation = _draggable.OriginalRotation;
     }
 
     private void DragAttachedObject()

@@ -17,8 +17,8 @@ public class Draggable : MonoBehaviour
     // ReSharper disable once UnusedMember.Local
     private void Start()
     {
-        OriginalPosition = transform.position;
-        OriginalRotation = transform.rotation;
+        OriginalPosition = transform.localPosition;
+        OriginalRotation = transform.localRotation;
     }
 
     // ReSharper disable once UnusedMember.Local
