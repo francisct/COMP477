@@ -1,12 +1,13 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 // ReSharper disable once CheckNamespace
-public class DragJoint : MonoBehaviour
+public class DragJoint2 : MonoBehaviour
 {
     // Candidates for public
     private float _fps = 15;
     private float SnapScale = 6;
-    private float AttachDistance = 1.5f;
 
     private float _timer, _currentScaleValue, _originalScaleValue;
 
@@ -35,35 +36,6 @@ public class DragJoint : MonoBehaviour
     {
         _mainCamera = Camera.main;
         _fps = 1 / _fps;
-
-        // Our object of interest is actually the grand-parent of the hit object
-        _dragObject = transform.parent.parent.gameObject;
-
-        // The hit object's parent tells us whether the object is attached or not
-        _draggable = _dragObject.GetComponent<Draggable>();
-
-        // Find the "scale" object in the hierarchy
-        foreach (Transform child in _dragObject.transform)
-        {
-            if (!child.name.Contains("Scale"))
-                continue;
-
-            _scaleObject = child.gameObject;
-            break;
-        }
-
-//        _originalRotation = _dragObject.transform.rotation.eulerAngles;
-        _originalRotation = _dragObject.transform.parent.rotation.eulerAngles;
-        _originalPosition = _dragObject.transform.position;
-        _originalScale = _scaleObject.transform.localScale;
-        _originalScaleValue = _scaleObject.transform.localScale.y;
-
-        _firstVector = transform.position - _originalPosition;
-        _firstNormalized = _firstVector.normalized;
-
-        // The second child contains the child limbs of this limb
-        _childTransform = _dragObject.transform.GetChild(1);
-        _childOriginalLocalPosition = _childTransform.localPosition;
     }
 
     // ReSharper disable once UnusedMember.Local
@@ -89,52 +61,74 @@ public class DragJoint : MonoBehaviour
     // ReSharper disable once UnusedMember.Local
     private void OnMouseDown()
     {
-        var worldMousePosition = CalculateMousePosition();
+        _dragObject = transform.gameObject;
+        _draggable = _dragObject.GetComponent<Draggable>();
 
-        // We need this offset when moving the objects
-        if (_draggable.Attached)
-            _offset = _originalPosition - worldMousePosition;
-        else
-            _offset = _dragObject.transform.position - worldMousePosition;
+        if (!_draggable.Attached)
+            return;
+
+        // Find the "scale" object in the hierarchy
+        foreach (Transform child in _dragObject.transform)
+        {
+            if (!child.name.Contains("Scale"))
+                continue;
+
+            _scaleObject = child.gameObject;
+            break;
+        }
+
+        _originalRotation = _dragObject.transform.parent.rotation.eulerAngles;
+        _originalPosition = _dragObject.transform.position;
+        _originalScale = _scaleObject.transform.localScale;
+        _originalScaleValue = _scaleObject.transform.localScale.y;
+
+        _childTransform = _dragObject.transform.GetChild(1);
+        _childOriginalLocalPosition = _childTransform.localPosition;
+
+        _firstVector = _childTransform.position - _originalPosition;
+        _firstNormalized = _firstVector.normalized;
+
+        var worldMousePosition = _draggable.CalculateMousePosition();
+
+        _offset = _originalPosition - worldMousePosition;
+
+        _draggable.ModifyRigidBodies(_draggable.Attached);
     }
 
-    private Vector3 CalculateMousePosition()
-    {
-        var mousePosition = Input.mousePosition;
-        mousePosition.z = transform.position.z - Camera.main.transform.position.z;
-        var worldMousePosition = _mainCamera.ScreenToWorldPoint(mousePosition);
-        worldMousePosition.z = transform.position.z;
-        return worldMousePosition;
-    }
+//    private Vector3 CalculateMousePosition()
+//    {
+//        var mousePosition = Input.mousePosition;
+//        mousePosition.z = transform.position.z - Camera.main.transform.position.z;
+//        var worldMousePosition = _mainCamera.ScreenToWorldPoint(mousePosition);
+//        worldMousePosition.z = transform.position.z;
+//        return worldMousePosition;
+//    }
 
     // ReSharper disable once UnusedMember.Local
     private void OnMouseDrag()
     {
-        _reset = false;
-
-        if (_draggable.Attached)
-            DragAttachedObject();
-        else
-            DragDetachedObject();
-    }
-
-    private void DragDetachedObject()
-    {
-        var worldMousePosition = CalculateMousePosition();
-        _dragObject.transform.position = worldMousePosition + _offset;
-
-        var distanceToParent = (_dragObject.transform.parent.position - _dragObject.transform.position).sqrMagnitude;
-        if (distanceToParent >= AttachDistance * AttachDistance)
+        if (!_draggable.Attached)
             return;
 
-        _draggable.Attached = true;
-        _dragObject.transform.localPosition = _draggable.OriginalPosition;
-        _dragObject.transform.localRotation = _draggable.OriginalRotation;
+        _reset = false;
+        DragAttachedObject();
+    }
+
+    // ReSharper disable once UnusedMember.Local
+    private void OnMouseUp()
+    {
+        if (!_draggable.Attached)
+            return;
+
+        _draggable.ModifyRigidBodies(false);
+
+        _currentScaleValue = _scaleObject.transform.localScale.y;
+        _reset = true;
     }
 
     private void DragAttachedObject()
     {
-        var worldMousePosition = CalculateMousePosition();
+        var worldMousePosition = _draggable.CalculateMousePosition();
 
         //var secondVector = worldMousePosition - _originalPosition + _offset;
         var secondVector = worldMousePosition - _originalPosition;
@@ -171,19 +165,16 @@ public class DragJoint : MonoBehaviour
         if (_scaleObject.transform.localScale.y <= SnapScale)
             return;
 
+        _draggable.ModifyRigidBodies(false);
+
         _scaleObject.transform.localScale = _originalScale;
         _childTransform.localPosition = _childOriginalLocalPosition;
+        Destroy(_dragObject.GetComponent<HingeJoint>());
         _draggable.Attached = false;
-    }
 
-    // ReSharper disable once UnusedMember.Local
-    private void OnMouseUp()
-    {
-        if (_draggable.Attached)
-        {
-            _currentScaleValue = _scaleObject.transform.localScale.y;
-            _reset = true;
-        }
+        _dragObject.transform.SetParent(null);
+
+        _draggable.CreateDetachedConfiguration();
     }
 
     private void UpdateChild()

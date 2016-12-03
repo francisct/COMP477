@@ -1,45 +1,75 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+
+public enum Side
+{
+    Left,
+    Right
+}
 
 // ReSharper disable once CheckNamespace
-public class Draggable : MonoBehaviour
+public abstract class Draggable : MonoBehaviour
 {
     public bool Attached;
 
     public Transform OriginalParent;
 
+    public float AttachDistance = 1;
+
+    public Side Side;
+
     internal Vector3 OriginalPosition;
     internal Quaternion OriginalRotation;
 
-    // The time we added the rigid-body (in order to allow some time for it
-    //      to pick up velocity before trying to remove it because of zero velocity)
-    private float _rigidBodyAddedTime;
+    protected Camera MainCamera;
+    protected Rigidbody[] Rigidbodies;
+    protected HingeJoint[] HingeJoints;
+    protected Transform[] ObjectChildren;
+    protected string SideString;
 
-    // ReSharper disable once UnusedMember.Local
-    private void Start()
+    protected virtual void Start()
     {
-        OriginalPosition = transform.localPosition;
-        OriginalRotation = transform.localRotation;
+        MainCamera = Camera.main;
+        SideString = Side == Side.Left ? "Left" : "Right";
     }
 
-    // ReSharper disable once UnusedMember.Local
-    private void Update()
+    protected virtual void Update() { }
+
+    public abstract void RestoreOriginalConfiguration();
+
+    public abstract void DestroyHingeJoints();
+
+    public abstract void ModifyRigidBodies(bool isKinematic);
+
+    public virtual void CreateDetachedConfiguration()
     {
-        var rigidBody = GetComponent<Rigidbody>();
+        ObjectChildren =
+                GetComponentsInChildren<Transform>()
+                           .Where(child => child.name.Contains("Object")).ToArray();
+        var rigidBodies = new List<Rigidbody>();
+        var hingeJoints = new List<HingeJoint>();
+        
+        DestroyHingeJoints();
 
-        if (rigidBody == null)
-            return;
+        for (var i = 0; i < ObjectChildren.Length; i++)
+        {
+            rigidBodies.Add(ObjectChildren[i].gameObject.AddComponent<Rigidbody>());
+            
+            if (i != 1)
+                hingeJoints.Add(ObjectChildren[i].gameObject.AddComponent<HingeJoint>());
+        }
 
-//        if (rigidBody.velocity == Vector3.zero && Time.time > _rigidBodyAddedTime + 0.5f)
-//            Destroy(rigidBody);
+        Rigidbodies = rigidBodies.ToArray();
+        HingeJoints = hingeJoints.ToArray();
     }
 
-    // Add a rigid-body to this limb so that it falls on the ground
-    public void AddRigidBody()
+    public Vector3 CalculateMousePosition()
     {
-        if (GetComponent<Rigidbody>() != null)
-            return;
-
-        gameObject.AddComponent<Rigidbody>();
-        _rigidBodyAddedTime = Time.time;
+        var mousePosition = Input.mousePosition;
+        mousePosition.z = transform.position.z - Camera.main.transform.position.z;
+        var worldMousePosition = MainCamera.ScreenToWorldPoint(mousePosition);
+        worldMousePosition.z = transform.position.z;
+        return worldMousePosition;
     }
 }
