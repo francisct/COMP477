@@ -2,7 +2,7 @@
 using System.Collections;
 using System;
 
-public class PreventChildScaling : MonoBehaviour {
+public class PreventInheritedScaling : MonoBehaviour {
 
     Vector3 localScale;
     Vector3 globalScale;
