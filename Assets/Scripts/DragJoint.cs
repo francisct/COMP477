@@ -4,8 +4,8 @@
 public class DragJoint : MonoBehaviour
 {
     // Candidates for public
-    public float FramesPerSecond = 30;
-    public float SnapScale = 4;
+    private float FramesPerSecond = 100;
+    private float SnapScale = 5;
     public float KineticCoefficient = 1.2f;
     public float DampingCoefficient = 0.2f;
 
@@ -53,7 +53,7 @@ public class DragJoint : MonoBehaviour
 
             _currentScaleValue = _currentScaleValue + _speed;
 
-            _speed = _speed - KineticCoefficient * (_currentScaleValue - _originalScaleValue) - DampingCoefficient* _speed;
+            _speed = _speed - KineticCoefficient * (_currentScaleValue - _originalScaleValue) - DampingCoefficient * _speed;
 
             _scaleObject.transform.localScale = new Vector3(_originalScale.x, _currentScaleValue, _originalScale.z);
             _timer = _fps;

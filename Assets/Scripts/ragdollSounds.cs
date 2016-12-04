@@ -76,7 +76,7 @@ public class ragdollSounds : MonoBehaviour
             }
             previousPosition = currPosition;
             distance = Vector2.Distance(currPosition, clickPoistion);
-            spring.pitch = 1 + 0.01f * distance;
+            spring.pitch = 1 + 0.015f * distance;
         }
     }
 
