@@ -26,6 +26,10 @@ public class ragdollSounds : MonoBehaviour
         attach = audios[3];
         click = audios[4];
         springBackMinor = audios[5];
+
+        spring.volume = 0.5f;
+        click.volume = 0.3f;
+        attach.volume = 0.7f;
     }
 
     void OnMouseDown()
@@ -44,7 +48,7 @@ public class ragdollSounds : MonoBehaviour
             else
             {
                 spring.Stop();
-                if (distance < 50)
+                if (distance < 60)
                     springBackMinor.Play();
                 else
                     springBack.Play();
