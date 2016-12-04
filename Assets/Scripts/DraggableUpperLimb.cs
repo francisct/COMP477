@@ -72,6 +72,7 @@ public class DraggableUpperLimb : Draggable
     public override void ModifyRigidBodies(bool isKinematic)
     {
         _upperLimb.GetComponent<Rigidbody>().isKinematic = isKinematic;
+        if (_lowerLimb.GetComponent<Rigidbody>() != null)
         _lowerLimb.GetComponent<Rigidbody>().isKinematic = isKinematic;
     }
 
@@ -83,8 +84,11 @@ public class DraggableUpperLimb : Draggable
         var anch = HingeJoints[0].anchor;
         anch.y = -1;
         HingeJoints[0].anchor = anch;
-        HingeJoints[1].connectedBody = Rigidbodies[1];
-        HingeJoints[2].connectedBody = Rigidbodies[2];
+
+        if (HingeJoints.Length >= 2)
+            HingeJoints[1].connectedBody = Rigidbodies[1];
+        if (HingeJoints.Length >= 3)
+            HingeJoints[2].connectedBody = Rigidbodies[2];
 
         var mouseDrag = ObjectChildren[1].gameObject.AddComponent<DragDetachedJoint>();
         ObjectChildren[1].position = CalculateMousePosition();
