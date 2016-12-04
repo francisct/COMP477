@@ -1,17 +1,18 @@
 ﻿using System.Linq;
 using UnityEngine;
 
-public class DraggableLowerArm : Draggable
+public class DraggableUpperLimb : Draggable
 {
-    private GameObject _upperArm;
-    private GameObject _lowerArm;
+    private GameObject _upperLimb;
+    private GameObject _lowerLimb;
 
     private GameObject[] _childObjects;
     private Vector3[]    _childObjectPositions;
     private Quaternion[] _childObjectRotations;
 
     // Joints
-    private Vector3 _lowerArmHingeJointAnchor;
+    private Vector3 _upperLimbHingeJointAnchor;
+    private Vector3 _lowerLimbHingeJointAnchor;
 
     protected override void Start()
     {
@@ -27,21 +28,26 @@ public class DraggableLowerArm : Draggable
         _childObjectRotations =
                 GetComponentsInChildren<Transform>().Select(trans => trans.localRotation).ToArray();
 
-        _upperArm = GameObject.Find($"{SideString}UpperArm");
-        _lowerArm = GameObject.Find($"{SideString}LowerArm");
+        var hingeJoints = GetComponentsInChildren<HingeJoint>();
+        _upperLimb = hingeJoints[0].gameObject;
+        _lowerLimb = hingeJoints[1].gameObject;
 
-        _lowerArmHingeJointAnchor = _lowerArm.GetComponent<HingeJoint>().connectedAnchor;
+        _upperLimbHingeJointAnchor = _upperLimb.GetComponent<HingeJoint>().connectedAnchor;
+        _lowerLimbHingeJointAnchor = _lowerLimb.GetComponent<HingeJoint>().connectedAnchor;
     }
 
     public override void DestroyHingeJoints()
     {
-        Destroy(_lowerArm.GetComponent<HingeJoint>());
-        Destroy(_lowerArm.GetComponent<Rigidbody>());
+        Destroy(_upperLimb.GetComponent<HingeJoint>());
+        Destroy(_upperLimb.GetComponent<Rigidbody>());
+        Destroy(_lowerLimb.GetComponent<HingeJoint>());
+        Destroy(_lowerLimb.GetComponent<Rigidbody>());
     }
 
     public override void AddRigidBodies()
     {
-        _lowerArm.AddComponent<Rigidbody>();
+        _upperLimb.AddComponent<Rigidbody>();
+        _lowerLimb.AddComponent<Rigidbody>();
     }
 
     protected override void UpdateChildComponents()
@@ -51,16 +57,22 @@ public class DraggableLowerArm : Draggable
             _childObjects[index].transform.localPosition = _childObjectPositions[index];
             _childObjects[index].transform.localRotation = _childObjectRotations[index];
         }
-        
-        var lowerJoint = _lowerArm.AddComponent<HingeJoint>();
+
+        var upperJoint = _upperLimb.AddComponent<HingeJoint>();
+        upperJoint.autoConfigureConnectedAnchor = false;
+        upperJoint.connectedBody = _upperLimb.transform.parent.GetComponent<Rigidbody>();
+        upperJoint.connectedAnchor = _upperLimbHingeJointAnchor;
+
+        var lowerJoint = _lowerLimb.AddComponent<HingeJoint>();
         lowerJoint.autoConfigureConnectedAnchor = false;
-        lowerJoint.connectedBody = _upperArm.GetComponent<Rigidbody>();
-        lowerJoint.connectedAnchor = _lowerArmHingeJointAnchor;
+        lowerJoint.connectedBody = _upperLimb.GetComponent<Rigidbody>();
+        lowerJoint.connectedAnchor = _lowerLimbHingeJointAnchor;
     }
 
     public override void ModifyRigidBodies(bool isKinematic)
     {
-        _lowerArm.GetComponent<Rigidbody>().isKinematic = isKinematic;
+        _upperLimb.GetComponent<Rigidbody>().isKinematic = isKinematic;
+        _lowerLimb.GetComponent<Rigidbody>().isKinematic = isKinematic;
     }
 
     public override void CreateDetachedConfiguration()
@@ -71,8 +83,10 @@ public class DraggableLowerArm : Draggable
         var anch = HingeJoints[0].anchor;
         anch.y = -1;
         HingeJoints[0].anchor = anch;
+        HingeJoints[1].connectedBody = Rigidbodies[1];
+        HingeJoints[2].connectedBody = Rigidbodies[2];
 
-        var mouseDrag = ObjectChildren[1].gameObject.AddComponent<SimpleMouseDrag>();
+        var mouseDrag = ObjectChildren[1].gameObject.AddComponent<DragDetachedJoint>();
         ObjectChildren[1].position = CalculateMousePosition();
         mouseDrag.Draggable = this;
         mouseDrag.Rigidbodies = Rigidbodies;

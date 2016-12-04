@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class SimpleMouseDrag : MonoBehaviour
+public class DragDetachedJoint : MonoBehaviour
 {
     internal Draggable Draggable;
     internal Rigidbody[] Rigidbodies;
@@ -41,7 +41,7 @@ public class SimpleMouseDrag : MonoBehaviour
             return;
 
         transform.parent.parent.SetParent(Draggable.OriginalParent);
-        Destroy(GetComponent<SimpleMouseDrag>());
+        Destroy(GetComponent<DragDetachedJoint>());
         Draggable.RestoreOriginalConfiguration();
         Draggable.Attached = true;
         _originalRestored = true;

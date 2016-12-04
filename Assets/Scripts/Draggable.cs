@@ -17,8 +17,6 @@ public abstract class Draggable : MonoBehaviour
 
     public float AttachDistance = 1;
 
-    public Side Side;
-
     internal Vector3 OriginalPosition;
     internal Quaternion OriginalRotation;
 
@@ -31,7 +29,6 @@ public abstract class Draggable : MonoBehaviour
     protected virtual void Start()
     {
         MainCamera = Camera.main;
-        SideString = Side == Side.Left ? "Left" : "Right";
     }
 
     protected virtual void Update() { }
