@@ -1,33 +1,14 @@
-﻿using UnityEngine;
+﻿using System.Linq;
+using UnityEngine;
 
 public class DraggableLowerArm : Draggable
 {
-    private GameObject _leftUpperArm;
-
-    // 1
+    private GameObject _upperArm;
     private GameObject _lowerArm;
-    private Vector3 _lowerArmPosition;
-    private Quaternion _lowerArmRotation;
 
-    // 2
-    private GameObject _lowerArmScale;
-    private Vector3 _lowerArmScalePosition;
-    private Quaternion _lowerArmScaleRotation;
-
-    // 3
-    private GameObject _lowerArmObject;
-    private Vector3 _lowerArmObjectPostion;
-    private Quaternion _lowerArmObjectRotation;
-
-    // 4
-    private GameObject _hand;
-    private Vector3 _handPosition;
-    private Quaternion _handRotation;
-
-    // 5
-    private GameObject _handObject;
-    private Vector3 _handObjectPosition;
-    private Quaternion _handObjectRotation;
+    private GameObject[] _childObjects;
+    private Vector3[]    _childObjectPositions;
+    private Quaternion[] _childObjectRotations;
 
     // Joints
     private Vector3 _lowerArmHingeJointAnchor;
@@ -39,73 +20,42 @@ public class DraggableLowerArm : Draggable
         OriginalPosition = transform.localPosition;
         OriginalRotation = transform.localRotation;
 
-        _leftUpperArm = GameObject.Find($"{SideString}UpperArm");
+        _childObjects =
+                GetComponentsInChildren<Transform>().Select(trans => trans.gameObject).ToArray();
+        _childObjectPositions =
+                GetComponentsInChildren<Transform>().Select(trans => trans.localPosition).ToArray();
+        _childObjectRotations =
+                GetComponentsInChildren<Transform>().Select(trans => trans.localRotation).ToArray();
 
-        // 1
-        _lowerArm         = GameObject.Find($"{SideString}LowerArm");
-        _lowerArmPosition = _lowerArm.transform.localPosition;
-        _lowerArmRotation = _lowerArm.transform.localRotation;
-
-        // 2
-        _lowerArmScale         = GameObject.Find($"{SideString}LowerArmScale");
-        _lowerArmScalePosition = _lowerArmScale.transform.localPosition;
-        _lowerArmScaleRotation = _lowerArmScale.transform.localRotation;
-
-        // 3
-        _lowerArmObject         = GameObject.Find($"{SideString}LowerArmObject");
-        _lowerArmObjectPostion  = _lowerArmObject.transform.localPosition;
-        _lowerArmObjectRotation = _lowerArmObject.transform.localRotation;
-
-        // 4
-        _hand         = GameObject.Find($"{SideString}Hand");
-        _handPosition = _hand.transform.localPosition;
-        _handRotation = _hand.transform.localRotation;
-
-        // 5
-        _handObject         = GameObject.Find($"{SideString}HandObject");
-        _handObjectPosition = _handObject.transform.localPosition;
-        _handObjectRotation = _handObject.transform.localRotation;
+        _upperArm = GameObject.Find($"{SideString}UpperArm");
+        _lowerArm = GameObject.Find($"{SideString}LowerArm");
 
         _lowerArmHingeJointAnchor = _lowerArm.GetComponent<HingeJoint>().connectedAnchor;
-    }
-
-    public override void RestoreOriginalConfiguration()
-    {
-        var lowerBody = _lowerArm.AddComponent<Rigidbody>();
-        lowerBody.isKinematic = true;
-
-        // 1
-        _lowerArm.transform.localPosition = _lowerArmPosition;
-        _lowerArm.transform.localRotation = _lowerArmRotation;
-
-        // 2
-        _lowerArmScale.transform.localPosition = _lowerArmScalePosition;
-        _lowerArmScale.transform.localRotation = _lowerArmScaleRotation;
-
-        // 3
-        _lowerArmObject.transform.localPosition = _lowerArmObjectPostion;
-        _lowerArmObject.transform.localRotation = _lowerArmObjectRotation;
-
-        // 4
-        _hand.transform.localPosition = _handPosition;
-        _hand.transform.localRotation = _handRotation;
-
-        // 5
-        _handObject.transform.localPosition = _handObjectPosition;
-        _handObject.transform.localRotation = _handObjectRotation;
-
-        var lowerJoint = _lowerArm.AddComponent<HingeJoint>();
-        lowerJoint.autoConfigureConnectedAnchor = false;
-        lowerJoint.connectedBody = _leftUpperArm.GetComponent<Rigidbody>();
-        lowerJoint.connectedAnchor = _lowerArmHingeJointAnchor;
-
-        lowerBody.isKinematic = false;
     }
 
     public override void DestroyHingeJoints()
     {
         Destroy(_lowerArm.GetComponent<HingeJoint>());
         Destroy(_lowerArm.GetComponent<Rigidbody>());
+    }
+
+    public override void AddRigidBodies()
+    {
+        _lowerArm.AddComponent<Rigidbody>();
+    }
+
+    protected override void UpdateChildComponents()
+    {
+        for (var index = 0; index < _childObjects.Length; index++)
+        {
+            _childObjects[index].transform.localPosition = _childObjectPositions[index];
+            _childObjects[index].transform.localRotation = _childObjectRotations[index];
+        }
+        
+        var lowerJoint = _lowerArm.AddComponent<HingeJoint>();
+        lowerJoint.autoConfigureConnectedAnchor = false;
+        lowerJoint.connectedBody = _upperArm.GetComponent<Rigidbody>();
+        lowerJoint.connectedAnchor = _lowerArmHingeJointAnchor;
     }
 
     public override void ModifyRigidBodies(bool isKinematic)

@@ -15,11 +15,6 @@ public class SimpleMouseDrag : MonoBehaviour
         _mainCamera = Camera.main;
     }
     
-    private void Update()
-    {
-    
-    }
-
     private Vector3 CalculateMousePosition()
     {
         var mousePosition = Input.mousePosition;
@@ -42,20 +37,11 @@ public class SimpleMouseDrag : MonoBehaviour
         transform.position = worldMousePosition + _offset;
 
         var distanceToParent = (transform.position - Draggable.OriginalParent.position).magnitude;
-        if (distanceToParent >= Draggable.AttachDistance)
+        if (distanceToParent >= Draggable.AttachDistance || _originalRestored)
             return;
 
         transform.parent.parent.SetParent(Draggable.OriginalParent);
-        AddTheThing();
-    }
-
-    private void AddTheThing()
-    {
-        if (_originalRestored)
-            return;
-
         Destroy(GetComponent<SimpleMouseDrag>());
-        RestoreOriginal();
         Draggable.RestoreOriginalConfiguration();
         Draggable.Attached = true;
         _originalRestored = true;
@@ -64,14 +50,5 @@ public class SimpleMouseDrag : MonoBehaviour
     private void OnMouseUp()
     {
         GetComponent<Rigidbody>().isKinematic = false;
-    }
-
-    public void RestoreOriginal()
-    {
-        foreach (var joint in HingeJoints)
-            Destroy(joint);
-
-        foreach (var rigidBody in Rigidbodies)
-            Destroy(rigidBody);
     }
 }

@@ -36,9 +36,25 @@ public abstract class Draggable : MonoBehaviour
 
     protected virtual void Update() { }
 
-    public abstract void RestoreOriginalConfiguration();
+    public void RestoreOriginalConfiguration()
+    {
+        foreach (var joint in HingeJoints)
+            Destroy(joint);
+
+        foreach (var rigidBody in Rigidbodies)
+            Destroy(rigidBody);
+
+        AddRigidBodies();
+        ModifyRigidBodies(true);
+        UpdateChildComponents();
+        ModifyRigidBodies(false);
+    }
 
     public abstract void DestroyHingeJoints();
+
+    public abstract void AddRigidBodies();
+
+    protected abstract void UpdateChildComponents();
 
     public abstract void ModifyRigidBodies(bool isKinematic);
 
