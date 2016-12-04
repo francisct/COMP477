@@ -1,21 +1,17 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
+﻿using UnityEngine;
 
 // ReSharper disable once CheckNamespace
 public class DragJoint2 : MonoBehaviour
 {
     // Candidates for public
     private float _fps = 15;
-    private float SnapScale = 6;
+    private readonly float SnapScale = 6;
 
     private float _timer, _currentScaleValue, _originalScaleValue;
 
     private GameObject _dragObject;
     private Draggable _draggable;
     private GameObject _scaleObject;
-
-    private Camera _mainCamera;
 
     private Transform _childTransform;
     private Vector3 _childOriginalLocalPosition;
@@ -34,7 +30,6 @@ public class DragJoint2 : MonoBehaviour
     // ReSharper disable once UnusedMember.Local
     private void Start()
     {
-        _mainCamera = Camera.main;
         _fps = 1 / _fps;
     }
 
@@ -95,15 +90,6 @@ public class DragJoint2 : MonoBehaviour
         _draggable.ModifyRigidBodies(_draggable.Attached);
     }
 
-//    private Vector3 CalculateMousePosition()
-//    {
-//        var mousePosition = Input.mousePosition;
-//        mousePosition.z = transform.position.z - Camera.main.transform.position.z;
-//        var worldMousePosition = _mainCamera.ScreenToWorldPoint(mousePosition);
-//        worldMousePosition.z = transform.position.z;
-//        return worldMousePosition;
-//    }
-
     // ReSharper disable once UnusedMember.Local
     private void OnMouseDrag()
     {
@@ -130,7 +116,6 @@ public class DragJoint2 : MonoBehaviour
     {
         var worldMousePosition = _draggable.CalculateMousePosition();
 
-        //var secondVector = worldMousePosition - _originalPosition + _offset;
         var secondVector = worldMousePosition - _originalPosition;
 
         Debug.DrawRay(_originalPosition, _offset, Color.red);
@@ -142,7 +127,6 @@ public class DragJoint2 : MonoBehaviour
         var cosine = _firstNormalized.x * secondNormalized.x + _firstVector.y * secondNormalized.y;
         var angle = Mathf.Atan2(sine, cosine) * Mathf.Rad2Deg;
         var rotation = _originalRotation - new Vector3(angle, 0, 0);
-//        _dragObject.transform.rotation = Quaternion.Euler(rotation);
         _dragObject.transform.parent.rotation = Quaternion.Euler(rotation);
 
         // Ratio of length: vector pointing to mouse position to vector point from parent
@@ -160,8 +144,6 @@ public class DragJoint2 : MonoBehaviour
         currentScale.z = _originalScale.z - (ratio - 1) / Z_SCALE_MULTIPLIER;
         _scaleObject.transform.localScale = currentScale;
 
-//        _childTransform.localPosition = _childOriginalLocalPosition - Vector3.up * (ratio - 1) / Y_SCALE_MULTIPLIER;
-//
         if (_scaleObject.transform.localScale.y <= SnapScale)
             return;
 

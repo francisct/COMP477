@@ -188,11 +188,8 @@ public class DraggableUpperArm : Draggable
 
     public override void ModifyRigidBodies(bool isKinematic)
     {
-        var upperArm = GameObject.Find($"{SideString}UpperArm");
-        var lowerArm = GameObject.Find($"{SideString}LowerArm");
-
-        upperArm.GetComponent<Rigidbody>().isKinematic = isKinematic;
-        lowerArm.GetComponent<Rigidbody>().isKinematic = isKinematic;
+        _upperArm.GetComponent<Rigidbody>().isKinematic = isKinematic;
+        _lowerArm.GetComponent<Rigidbody>().isKinematic = isKinematic;
     }
 
     public override void CreateDetachedConfiguration()
