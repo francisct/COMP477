@@ -69,13 +69,11 @@ public class DraggableLowerLimb : Draggable
 
         HingeJoints[0].connectedBody = Rigidbodies[1];
         var anch = HingeJoints[0].anchor;
-        anch.y = -1;
+        anch.y = -1.8f;
         HingeJoints[0].anchor = anch;
 
         var detachedJointDrag = ObjectChildren[1].gameObject.AddComponent<DragDetachedJoint>();
         ObjectChildren[1].position = CalculateMousePosition();
         detachedJointDrag.Draggable = this;
-        detachedJointDrag.Rigidbodies = Rigidbodies;
-        detachedJointDrag.HingeJoints = HingeJoints;
     }
 }

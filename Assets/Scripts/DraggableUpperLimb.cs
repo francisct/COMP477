@@ -40,6 +40,10 @@ public class DraggableUpperLimb : Draggable
     {
         Destroy(_upperLimb.GetComponent<HingeJoint>());
         Destroy(_upperLimb.GetComponent<Rigidbody>());
+
+        if (!IsChild(_lowerLimb))
+            return;
+
         Destroy(_lowerLimb.GetComponent<HingeJoint>());
         Destroy(_lowerLimb.GetComponent<Rigidbody>());
     }
@@ -47,6 +51,10 @@ public class DraggableUpperLimb : Draggable
     public override void AddRigidBodies()
     {
         _upperLimb.AddComponent<Rigidbody>();
+
+        if (!IsChild(_lowerLimb))
+            return;
+
         _lowerLimb.AddComponent<Rigidbody>();
     }
 
@@ -54,6 +62,9 @@ public class DraggableUpperLimb : Draggable
     {
         for (var index = 0; index < _childObjects.Length; index++)
         {
+            if (!IsChild(_childObjects[index]))
+                continue;
+
             _childObjects[index].transform.localPosition = _childObjectPositions[index];
             _childObjects[index].transform.localRotation = _childObjectRotations[index];
         }
@@ -62,6 +73,9 @@ public class DraggableUpperLimb : Draggable
         upperJoint.autoConfigureConnectedAnchor = false;
         upperJoint.connectedBody = _upperLimb.transform.parent.GetComponent<Rigidbody>();
         upperJoint.connectedAnchor = _upperLimbHingeJointAnchor;
+
+        if (!IsChild(_lowerLimb))
+            return;
 
         var lowerJoint = _lowerLimb.AddComponent<HingeJoint>();
         lowerJoint.autoConfigureConnectedAnchor = false;
@@ -72,7 +86,10 @@ public class DraggableUpperLimb : Draggable
     public override void ModifyRigidBodies(bool isKinematic)
     {
         _upperLimb.GetComponent<Rigidbody>().isKinematic = isKinematic;
-        if (_lowerLimb.GetComponent<Rigidbody>() != null)
+
+        if (!IsChild(_lowerLimb))
+            return;
+
         _lowerLimb.GetComponent<Rigidbody>().isKinematic = isKinematic;
     }
 
@@ -82,18 +99,22 @@ public class DraggableUpperLimb : Draggable
 
         HingeJoints[0].connectedBody = Rigidbodies[1];
         var anch = HingeJoints[0].anchor;
-        anch.y = -1;
+        anch.y = -1.8f;
         HingeJoints[0].anchor = anch;
 
         if (HingeJoints.Length >= 2)
+        {
             HingeJoints[1].connectedBody = Rigidbodies[1];
+            anch = HingeJoints[1].anchor;
+            anch.y = 1.8f;
+            HingeJoints[1].anchor = anch;
+        }
+
         if (HingeJoints.Length >= 3)
             HingeJoints[2].connectedBody = Rigidbodies[2];
 
         var mouseDrag = ObjectChildren[1].gameObject.AddComponent<DragDetachedJoint>();
         ObjectChildren[1].position = CalculateMousePosition();
         mouseDrag.Draggable = this;
-        mouseDrag.Rigidbodies = Rigidbodies;
-        mouseDrag.HingeJoints = HingeJoints;
     }
 }

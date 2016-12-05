@@ -3,8 +3,6 @@
 public class DragDetachedJoint : MonoBehaviour
 {
     internal Draggable Draggable;
-    internal Rigidbody[] Rigidbodies;
-    internal HingeJoint[] HingeJoints;
 
     private Camera _mainCamera;
     private Vector3 _offset;
@@ -44,7 +42,7 @@ public class DragDetachedJoint : MonoBehaviour
         var worldMousePosition = CalculateMousePosition();
         transform.position = worldMousePosition + _offset;
 
-        var distanceToParent = (transform.position - Draggable.OriginalParent.position).magnitude;
+        var distanceToParent = CalculateDistanceToParent();
         if (distanceToParent >= Draggable.AttachDistance || _originalRestored)
             return;
 
@@ -58,5 +56,11 @@ public class DragDetachedJoint : MonoBehaviour
     private void OnMouseUp()
     {
         GetComponent<Rigidbody>().isKinematic = false;
+    }
+
+    private float CalculateDistanceToParent()
+    {
+        return Mathf.Sqrt(Mathf.Pow(transform.position.x - Draggable.OriginalParent.position.x, 2) +
+                          Mathf.Pow(transform.position.y - Draggable.OriginalParent.position.y, 2));
     }
 }

@@ -85,4 +85,12 @@ public abstract class Draggable : MonoBehaviour
         worldMousePosition.z = transform.position.z;
         return worldMousePosition;
     }
+
+    protected bool IsChild(GameObject childObject)
+    {
+        // Check whether the game object is a child
+        var children =
+                GetComponentsInChildren<Transform>().Select(trans => trans.gameObject).ToList();
+        return children.Find(child => child.name == childObject.name) != null;
+    }
 }
