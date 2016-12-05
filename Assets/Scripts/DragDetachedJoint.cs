@@ -14,9 +14,13 @@ public class DragDetachedJoint : MonoBehaviour
     {
         _mainCamera = Camera.main;
     }
-    
+
+    //static int hi = 0;
     private Vector3 CalculateMousePosition()
     {
+        //Debug.Log(hi);
+        //++hi;
+
         var mousePosition = Input.mousePosition;
         mousePosition.z = transform.position.z - Camera.main.transform.position.z;
         var worldMousePosition = _mainCamera.ScreenToWorldPoint(mousePosition);
@@ -29,6 +33,10 @@ public class DragDetachedJoint : MonoBehaviour
         GetComponent<Rigidbody>().isKinematic = true;
         var worldMousePosition = CalculateMousePosition();
         _offset = transform.position - worldMousePosition;
+
+        var audio = GetComponent<AudioSource>();
+        audio.volume = 0.3f;
+        audio.Play();
     }
 
     private void OnMouseDrag()
