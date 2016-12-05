@@ -4,8 +4,8 @@
 public class DragJoint : MonoBehaviour
 {
     // Candidates for public
-    private float FramesPerSecond = 100;
-    private float SnapScale = 5;
+    public float FramesPerSecond = 100;
+    public float SnapScale = 5;
     public float KineticCoefficient = 1.2f;
     public float DampingCoefficient = 0.2f;
 
