@@ -13,7 +13,25 @@
             </div>
 
             <div class="row form-group well">
-                <p class="text-justify">In this project, we use Unity to simulate dismemberment for a ragdoll.</p>
+                <h3 class="text-justify">
+                    Idea: use Unity to simulate dismemberment of a ragdoll
+                </h3>
+                <p class="text-justify">
+                    The idea is to use hierarchical modeling to create a ragdoll model, which allows interaction
+                    with its joints. When we drag a joint, it causes its parent limb to be stretched. When the amount
+                    of stretch exceeds a pre-defined amount (the <code>Snap Scale</code> property of the
+                    <code>DragJoint</code> script component attached to parent limbs).
+                </p>
+                <p class="text-justify">
+                    Once a limb is snapped (de-attached) from the body, it will fall onto the ground. We can use the same
+                    joint we initially used to drag the object to pick up the limb. This causes the limb(s) to hang from
+                    the joint that we are holding. If the limb is moved towards the parent, and once the distance is less
+                    than a specific amount (the <code>Attach Distance</code> property of the <code>DragJoint</code> script),
+                    it will re-attach to its original location.
+                </p>
+                <p class="text-justify">
+                    More detailed information can be found in the report document <a href="docs/Report.pdf">here</a>
+                </p>
             </div>
 
             <div class="row form-group">
@@ -46,7 +64,11 @@
                 <p class="text-justify">Snapping (Deattaching) a limb from the ragdoll</p>
                 
                 <div class="col-sm-8 col-sm-offset-2">
-                    <img src="images/04-snapping.gif" class="img-thumbnail" alt="Image">
+                    <img src="images/04-snapping_1.gif" class="img-thumbnail" alt="Image">
+                </div>
+
+                <div class="col-sm-8 col-sm-offset-2">
+                    <img src="images/04-snapping_2.gif" class="img-thumbnail" alt="Image">
                 </div>
             </div>
 
